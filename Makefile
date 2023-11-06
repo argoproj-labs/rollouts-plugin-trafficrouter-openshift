@@ -1,5 +1,5 @@
-.PHONY: go_lint
-go_lint:
+.PHONY: lint
+lint:
 	golangci-lint run ./...
 
 .PHONY: build

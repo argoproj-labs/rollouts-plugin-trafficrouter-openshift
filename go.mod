@@ -5,6 +5,8 @@ go 1.20
 require (
 	github.com/argoproj/argo-rollouts v1.6.0
 	github.com/hashicorp/go-plugin v1.4.10
+	github.com/openshift/api v0.0.0-20231102215821-c90b4c82852e
+	k8s.io/apimachinery v0.28.3
 )
 
 require (
@@ -16,7 +18,6 @@ require (
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	k8s.io/apimachinery v0.28.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
 
