@@ -10,12 +10,7 @@ import (
 )
 
 func NewKubeConfig() (*rest.Config, error) {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	// if you want to change the loading rules (which files in which order), you can do so here
-	configOverrides := &clientcmd.ConfigOverrides{}
-	// if you want to change override values or bind them to flags, there are methods to help you
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(loadingRules, configOverrides)
-	config, err := kubeConfig.ClientConfig()
+	config, err := clientcmd.BuildConfigFromFlags("", "")
 	if err != nil {
 		return nil, pluginTypes.RpcError{ErrorString: err.Error()}
 	}
