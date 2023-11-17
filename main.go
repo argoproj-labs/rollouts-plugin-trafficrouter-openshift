@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 
-	"golang.org/x/exp/slog"
+	"log/slog"
 
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/plugin"
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/utils"

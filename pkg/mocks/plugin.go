@@ -68,7 +68,7 @@ func newRoute(name string) *routev1.Route {
 				Weight: desiredWeight,
 			},
 			AlternateBackends: []routev1.RouteTargetReference{
-				routev1.RouteTargetReference{
+				{
 					Weight: desiredAltWeight,
 				},
 			},
