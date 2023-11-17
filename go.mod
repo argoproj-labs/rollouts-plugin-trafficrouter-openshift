@@ -6,13 +6,15 @@ require (
 	github.com/argoproj/argo-rollouts v1.6.0
 	github.com/hashicorp/go-plugin v1.4.10
 	github.com/openshift/api v0.0.0-20231102215821-c90b4c82852e
-	k8s.io/apimachinery v0.28.3
+	k8s.io/apimachinery v0.28.4
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	golang.org/x/oauth2 v0.8.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
@@ -53,8 +55,8 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	k8s.io/api v0.28.3 // indirect
-	k8s.io/client-go v0.28.3
+	k8s.io/api v0.28.4 // indirect
+	k8s.io/client-go v0.28.4
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20230717233707-2695361300d9 // indirect
 	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect

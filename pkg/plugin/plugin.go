@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"log/slog"
+
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/utils"
 	"github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/rollout/trafficrouting/plugin/rpc"
 	pluginTypes "github.com/argoproj/argo-rollouts/utils/plugin/types"
 	routev1 "github.com/openshift/api/route/v1"
-	"golang.org/x/exp/slog"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -121,7 +122,7 @@ func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			msg := fmt.Sprintf("Route %q not found", routeName)
-			slog.Debug("OpenshiftRouteNotFound", msg)
+			slog.Debug("OpenshiftRouteNotFound: " + msg)
 		}
 		return err
 	}
@@ -132,13 +133,13 @@ func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *
 		return nil
 	}
 
-	slog.Info("updating default backend weight to %d", altWeight)
+	slog.Info("updating default backend weight to " + string(altWeight))
 	openshiftRoute.Spec.To.Weight = &altWeight
 	if desiredWeight == 0 {
 		slog.Info("deleting alternateBackends")
 		openshiftRoute.Spec.AlternateBackends = nil
 	} else {
-		slog.Info("updating alternate backend weight to %d", desiredWeight)
+		slog.Info("updating alternate backend weight to " + string(desiredWeight))
 		openshiftRoute.Spec.AlternateBackends = []routev1.RouteTargetReference{{
 			Kind:   "Service",
 			Name:   routeName,
