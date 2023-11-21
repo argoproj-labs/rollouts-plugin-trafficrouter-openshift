@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"log/slog"
 
@@ -74,8 +75,13 @@ func (r *RpcPlugin) SetWeight(rollout *v1alpha1.Rollout, desiredWeight int32, ad
 
 	for _, route := range openshift.Routes {
 		slog.Info("updating route", slog.String("name", route))
-
-		if err := r.updateRoute(ctx, route, rollout, desiredWeight, rollout.Namespace); err != nil {
+		namespace := rollout.Namespace
+		routeName := route
+		if strings.Contains(route, "/") {
+			namespace = strings.Split(route, "/")[0]
+			routeName = strings.Split(route, "/")[1]
+		}
+		if err := r.updateRoute(ctx, routeName, rollout, desiredWeight, namespace); err != nil {
 			slog.Error("failed to update route", slog.String("name", route), slog.Any("err", err))
 			return pluginTypes.RpcError{ErrorString: err.Error()}
 		}
