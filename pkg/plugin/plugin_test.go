@@ -11,7 +11,6 @@ import (
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/mocks"
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/utils"
 
-	routev1 "github.com/openshift/api/route/v1"
 	fakeDynClient "k8s.io/client-go/dynamic/fake"
 
 	"github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
@@ -35,11 +34,7 @@ func TestRunSuccessfully(t *testing.T) {
 	defer cancel()
 
 	s := runtime.NewScheme()
-	b := runtime.SchemeBuilder{
-		routev1.AddToScheme,
-	}
 
-	_ = b.AddToScheme(s)
 	dynClient := fakeDynClient.NewSimpleDynamicClient(s, mocks.MakeObjects()...)
 	rpcPluginImp := &RpcPlugin{
 		IsTest:        true,
@@ -97,14 +92,7 @@ func TestRunSuccessfully(t *testing.T) {
 		t.Fatalf("should not err: %s", err)
 	}
 
-	// Request the plugin
-	raw, err := client.Dispense("RpcTrafficRouterPlugin")
-	if err != nil {
-		t.Fail()
-	}
-
-	pluginInstance := raw.(*rolloutsPlugin.TrafficRouterPluginRPC)
-	if err := pluginInstance.InitPlugin(); err.HasError() {
+	if err := rpcPluginImp.InitPlugin(); err.HasError() {
 		t.Fail()
 	}
 
@@ -112,7 +100,7 @@ func TestRunSuccessfully(t *testing.T) {
 		rollout := newRollout(mocks.StableServiceName, mocks.CanaryServiceName, mocks.RouteName)
 		desiredWeight := int32(30)
 
-		if err := pluginInstance.SetWeight(rollout, desiredWeight, []v1alpha1.WeightDestination{}); err.HasError() {
+		if err := rpcPluginImp.SetWeight(rollout, desiredWeight, []v1alpha1.WeightDestination{}); err.HasError() {
 			t.Fail()
 		}
 

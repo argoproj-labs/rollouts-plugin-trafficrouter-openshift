@@ -30,8 +30,8 @@ func MakeObjects() []runtime.Object {
 	invalidRoute := newRoute(InvalidRouteName)
 	invalidRoute.Status = routev1.RouteStatus{}
 
-	outdatedHttpProxy := newRoute(OutdatedRouteName)
-	outdatedHttpProxy.Generation = RouteGeneration + 1
+	outdatedRoute := newRoute(OutdatedRouteName)
+	outdatedRoute.Generation = RouteGeneration + 1
 
 	falseConditionRoute := newRoute(FalseConditionRouteName)
 	falseConditionRoute.Status = routev1.RouteStatus{}
@@ -40,19 +40,17 @@ func MakeObjects() []runtime.Object {
 		route,
 		validRoute,
 		invalidRoute,
-		outdatedHttpProxy,
+		outdatedRoute,
 		falseConditionRoute,
 	}
 	return objs
 }
 
 func newRoute(name string) *routev1.Route {
-	var desiredWeight *int32
-	desiredWeight = new(int32)
+	var desiredWeight *int32 = new(int32)
 	*desiredWeight = RouteDesiredWeight
 
-	var desiredAltWeight *int32
-	desiredAltWeight = new(int32)
+	var desiredAltWeight *int32 = new(int32)
 	*desiredAltWeight = 100 - RouteDesiredWeight
 
 	return &routev1.Route{
