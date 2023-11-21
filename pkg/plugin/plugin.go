@@ -73,7 +73,7 @@ func (r *RpcPlugin) SetWeight(rollout *v1alpha1.Rollout, desiredWeight int32, ad
 	ctx := context.Background()
 
 	for _, route := range openshift.Routes {
-		slog.Debug("updating route", slog.String("name", route))
+		slog.Info("updating route", slog.String("name", route))
 
 		if err := r.updateRoute(ctx, route, rollout, desiredWeight, rollout.Namespace); err != nil {
 			slog.Error("failed to update route", slog.String("name", route), slog.Any("err", err))
@@ -122,7 +122,7 @@ func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			msg := fmt.Sprintf("Route %q not found", routeName)
-			slog.Debug("OpenshiftRouteNotFound: " + msg)
+			slog.Error("OpenshiftRouteNotFound: " + msg)
 		}
 		return err
 	}

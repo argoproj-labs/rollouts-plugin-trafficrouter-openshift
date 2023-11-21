@@ -4,9 +4,7 @@ metadata:
   name: rollouts-plugin-trafficrouter-openshift
 rules:
   - verbs:
-      - watch
-      - get
-      - update
+      - '*'
     apiGroups:
       - route.openshift.io
     resources:
