@@ -13,3 +13,7 @@ release:
 	make BIN_NAME=gateway-api-plugin-linux-amd64 GOOS=linux gateway-api-plugin-build
 	make BIN_NAME=gateway-api-plugin-linux-arm64 GOOS=linux GOARCH=arm64 gateway-api-plugin-build
 	make BIN_NAME=gateway-api-plugin-windows-amd64.exe GOOS=windows gateway-api-plugin-build
+
+.PHONY: test
+test: ## Run tests.
+	go test -coverprofile cover.out `go list ./...`
