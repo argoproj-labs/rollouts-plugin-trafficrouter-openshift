@@ -1,9 +1,9 @@
 module github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift
 
-go 1.20
+go 1.21
 
 require (
-	github.com/argoproj/argo-rollouts v1.6.0
+	github.com/argoproj/argo-rollouts v1.6.4
 	github.com/hashicorp/go-plugin v1.4.10
 	github.com/openshift/api v0.0.0-20231102215821-c90b4c82852e
 	k8s.io/apimachinery v0.28.4
@@ -16,9 +16,10 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/oauth2 v0.8.0 // indirect
+	golang.org/x/oauth2 v0.10.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
+	golang.org/x/tools v0.14.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
@@ -45,11 +46,10 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230525234030-28d5490b6b19 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
 	google.golang.org/grpc v1.57.0 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

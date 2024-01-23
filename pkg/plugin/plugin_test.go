@@ -17,7 +17,9 @@ import (
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/rollout/trafficrouting/plugin/rpc"
 
 	goPlugin "github.com/hashicorp/go-plugin"
+	routev1 "github.com/openshift/api/route/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -34,6 +36,10 @@ func TestRunSuccessfully(t *testing.T) {
 	defer cancel()
 
 	s := runtime.NewScheme()
+
+	if err := routev1.AddToScheme(s); err != nil {
+		t.Fatal("unable to add scheme")
+	}
 
 	dynClient := fakeDynClient.NewSimpleDynamicClient(s, mocks.MakeObjects()...)
 	rpcPluginImp := &RpcPlugin{
@@ -93,7 +99,7 @@ func TestRunSuccessfully(t *testing.T) {
 	}
 
 	if err := rpcPluginImp.InitPlugin(); err.HasError() {
-		t.Fail()
+		t.Fatal(err)
 	}
 
 	t.Run("SetWeight", func(t *testing.T) {
@@ -101,7 +107,7 @@ func TestRunSuccessfully(t *testing.T) {
 		desiredWeight := int32(30)
 
 		if err := rpcPluginImp.SetWeight(rollout, desiredWeight, []v1alpha1.WeightDestination{}); err.HasError() {
-			t.Fail()
+			t.Fatal(err)
 		}
 
 		alternateBackends := rpcPluginImp.UpdatedRoute.Spec.AlternateBackends
