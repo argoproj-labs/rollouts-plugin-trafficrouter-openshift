@@ -13,11 +13,9 @@ import (
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/rollout/trafficrouting/plugin/rpc"
 	pluginTypes "github.com/argoproj/argo-rollouts/utils/plugin/types"
 	routev1 "github.com/openshift/api/route/v1"
+	openshiftclientset "github.com/openshift/client-go/route/clientset/versioned"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/dynamic"
 )
 
 // Type holds this controller type
@@ -26,9 +24,7 @@ const Type = "Openshift"
 var _ rolloutsPlugin.TrafficRouterPlugin = (*RpcPlugin)(nil)
 
 type RpcPlugin struct {
-	IsTest        bool
-	dynamicClient dynamic.Interface
-	UpdatedRoute  *routev1.Route
+	routeClient openshiftclientset.Interface
 }
 
 // OpenshiftTrafficRouting defines the configuration required to use Openshift routes for traffic
@@ -38,16 +34,12 @@ type OpenshiftTrafficRouting struct {
 }
 
 func (r *RpcPlugin) InitPlugin() pluginTypes.RpcError {
-	if r.IsTest {
-		return pluginTypes.RpcError{}
-	}
-
 	cfg, err := utils.NewKubeConfig()
 	if err != nil {
 		return pluginTypes.RpcError{ErrorString: err.Error()}
 	}
 
-	r.dynamicClient, err = dynamic.NewForConfig(cfg)
+	r.routeClient, err = openshiftclientset.NewForConfig(cfg)
 	if err != nil {
 		return pluginTypes.RpcError{ErrorString: err.Error()}
 	}
@@ -124,7 +116,7 @@ func getOpenshiftRouting(rollout *v1alpha1.Rollout) (*OpenshiftTrafficRouting, e
 // otherwise update alternateBackends
 func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *v1alpha1.Rollout, desiredWeight int32, namespace string) error {
 	// get the route in the given namespace
-	openshiftRoute, err := r.getRoute(ctx, namespace, routeName)
+	openshiftRoute, err := r.routeClient.RouteV1().Routes(namespace).Get(ctx, routeName, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			msg := fmt.Sprintf("Route %q not found", routeName)
@@ -153,38 +145,12 @@ func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *
 		}}
 	}
 
-	// convert openshiftRoute into map[string]interface{} for Updating the Route using dynamicClient
-	m, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&openshiftRoute)
+	_, err = r.routeClient.RouteV1().Routes(rollout.Namespace).Update(ctx, openshiftRoute, metav1.UpdateOptions{})
 	if err != nil {
 		return err
 	}
 
-	updated, err := r.dynamicClient.Resource(routev1.GroupVersion.WithResource("route")).Namespace(rollout.Namespace).Update(ctx, &unstructured.Unstructured{Object: m}, metav1.UpdateOptions{})
-	if err != nil {
-		return err
-	}
-
-	if r.IsTest {
-		var route routev1.Route
-		if err := runtime.DefaultUnstructuredConverter.FromUnstructured(updated.UnstructuredContent(), &route); err != nil {
-			return err
-		}
-		r.UpdatedRoute = &route
-	}
 	return err
-}
-
-func (r *RpcPlugin) getRoute(ctx context.Context, namespace string, routeName string) (*routev1.Route, error) {
-	unstr, err := r.dynamicClient.Resource(routev1.GroupVersion.WithResource("Route")).Namespace(namespace).Get(ctx, routeName, metav1.GetOptions{})
-	if err != nil {
-		return nil, err
-	}
-	var openshiftRoute routev1.Route
-	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(unstr.UnstructuredContent(), &openshiftRoute); err != nil {
-		return nil, err
-	}
-	return &openshiftRoute, nil
-
 }
 
 func validateRolloutParameters(rollout *v1alpha1.Rollout) error {

@@ -11,7 +11,7 @@ import (
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/mocks"
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/utils"
 
-	fakeDynClient "k8s.io/client-go/dynamic/fake"
+	"github.com/openshift/client-go/route/clientset/versioned/fake"
 
 	"github.com/argoproj/argo-rollouts/pkg/apis/rollouts/v1alpha1"
 	rolloutsPlugin "github.com/argoproj/argo-rollouts/rollout/trafficrouting/plugin/rpc"
@@ -41,10 +41,9 @@ func TestRunSuccessfully(t *testing.T) {
 		t.Fatal("unable to add scheme")
 	}
 
-	dynClient := fakeDynClient.NewSimpleDynamicClient(s, mocks.MakeObjects()...)
+	fakeClient := fake.NewSimpleClientset(mocks.MakeObjects()...)
 	rpcPluginImp := &RpcPlugin{
-		IsTest:        true,
-		dynamicClient: dynClient,
+		routeClient: fakeClient,
 	}
 
 	// pluginMap is the map of plugins we can dispense.
@@ -102,6 +101,12 @@ func TestRunSuccessfully(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Cleanup(func() {
+		// Canceling should cause an exit
+		cancel()
+		<-closeCh
+	})
+
 	t.Run("SetWeight", func(t *testing.T) {
 		rollout := newRollout(mocks.StableServiceName, mocks.CanaryServiceName, mocks.RouteName)
 		desiredWeight := int32(30)
@@ -110,14 +115,22 @@ func TestRunSuccessfully(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		alternateBackends := rpcPluginImp.UpdatedRoute.Spec.AlternateBackends
+		var route *routev1.Route
+		route, err = rpcPluginImp.routeClient.RouteV1().Routes(rollout.Namespace).Get(ctx, mocks.RouteName, metav1.GetOptions{})
+		if err != nil {
+			t.Fatal(err)
+		}
 
-		if 100-desiredWeight != int32(*alternateBackends[0].Weight) {
-			t.Fail()
+		assertWeights := func(t *testing.T, expected, got int32) {
+			t.Helper()
+			if expected != got {
+				t.Errorf("weights don't match expected %d got %d", expected, got)
+			}
 		}
-		if desiredWeight != int32(*alternateBackends[1].Weight) {
-			t.Fail()
-		}
+
+		// verify if the weights have been updated in the route.
+		assertWeights(t, 100-desiredWeight, *route.Spec.To.Weight)
+		assertWeights(t, desiredWeight, *route.Spec.AlternateBackends[0].Weight)
 
 	})
 
