@@ -19,7 +19,7 @@ import (
 )
 
 // Type holds this controller type
-const Type = "Openshift"
+const ControllerType = "Openshift"
 
 var _ rolloutsPlugin.TrafficRouterPlugin = (*RpcPlugin)(nil)
 
@@ -100,7 +100,7 @@ func (r *RpcPlugin) RemoveManagedRoutes(ro *v1alpha1.Rollout) pluginTypes.RpcErr
 }
 
 func (r *RpcPlugin) Type() string {
-	return Type
+	return ControllerType
 }
 
 func getOpenshiftRouting(rollout *v1alpha1.Rollout) (*OpenshiftTrafficRouting, error) {
