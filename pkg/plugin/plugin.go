@@ -52,7 +52,7 @@ func (r *RpcPlugin) UpdateHash(ro *v1alpha1.Rollout, canaryHash, stableHash stri
 	return pluginTypes.RpcError{}
 }
 
-// SetWeight modifies Nginx Ingress resources to reach desired state
+// SetWeight modifies the OpenShift Route resource to reach the desired weight.
 func (r *RpcPlugin) SetWeight(rollout *v1alpha1.Rollout, desiredWeight int32, additionalDestinations []v1alpha1.WeightDestination) pluginTypes.RpcError {
 	if err := validateRolloutParameters(rollout); err != nil {
 		return pluginTypes.RpcError{ErrorString: err.Error()}
@@ -66,7 +66,7 @@ func (r *RpcPlugin) SetWeight(rollout *v1alpha1.Rollout, desiredWeight int32, ad
 	ctx := context.Background()
 
 	for _, route := range openshift.Routes {
-		slog.Info("updating route", slog.String("name", route))
+		slog.Info("updating route", slog.String("name", route), slog.Any("weight", desiredWeight))
 		namespace := rollout.Namespace
 		routeName := route
 		if strings.Contains(route, "/") {
@@ -77,7 +77,7 @@ func (r *RpcPlugin) SetWeight(rollout *v1alpha1.Rollout, desiredWeight int32, ad
 			slog.Error("failed to update route", slog.String("name", route), slog.Any("err", err))
 			return pluginTypes.RpcError{ErrorString: err.Error()}
 		}
-		slog.Info("successfully updated route", slog.String("name", route))
+		slog.Info("successfully updated route", slog.String("name", route), slog.Any("weight", desiredWeight))
 	}
 	return pluginTypes.RpcError{}
 }

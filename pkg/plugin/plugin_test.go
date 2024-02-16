@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"log/slog"
-	"os"
 	"time"
 
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/mocks"
@@ -284,10 +283,7 @@ func newRollout(stableSvc, canarySvc, routeName string) *v1alpha1.Rollout {
 		Routes: []string{routeName},
 	}
 	encodedContourConfig, err := json.Marshal(contourConfig)
-	if err != nil {
-		slog.Error("marshal the route's config is failed", slog.Any("err", err))
-		os.Exit(1)
-	}
+	Expect(err).ToNot(HaveOccurred())
 
 	return &v1alpha1.Rollout{
 		ObjectMeta: metav1.ObjectMeta{
