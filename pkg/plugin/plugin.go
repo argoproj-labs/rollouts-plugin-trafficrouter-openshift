@@ -140,7 +140,7 @@ func (r *RpcPlugin) updateRoute(ctx context.Context, routeName string, rollout *
 		slog.Info("updating alternate backend weight to " + string(desiredWeight))
 		openshiftRoute.Spec.AlternateBackends = []routev1.RouteTargetReference{{
 			Kind:   "Service",
-			Name:   routeName,
+			Name:   rollout.Spec.Strategy.Canary.CanaryService,
 			Weight: &desiredWeight,
 		}}
 	}

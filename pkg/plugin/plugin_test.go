@@ -127,7 +127,10 @@ var _ = Describe("Test TrafficRouter plugin for OpenShift route", func() {
 
 			// verify if the weights have been updated in the route.
 			Expect(100 - desiredWeight).To(Equal(*route.Spec.To.Weight))
+			Expect(route.Spec.AlternateBackends).Should(HaveLen(1))
+			Expect(route.Spec.AlternateBackends[0].Kind).To(Equal("Service"))
 			Expect(desiredWeight).To(Equal(*route.Spec.AlternateBackends[0].Weight))
+			Expect(route.Spec.AlternateBackends[0].Name).To(Equal(rollout.Spec.Strategy.Canary.CanaryService))
 		})
 
 		It("should return an error if the plugin config is not present", func() {
