@@ -5,17 +5,14 @@ import (
 
 	"log/slog"
 
-	pluginTypes "github.com/argoproj/argo-rollouts/utils/plugin/types"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 func NewKubeConfig() (*rest.Config, error) {
-	config, err := clientcmd.BuildConfigFromFlags("", "")
-	if err != nil {
-		return nil, pluginTypes.RpcError{ErrorString: err.Error()}
-	}
-	return config, nil
+	rules := clientcmd.NewDefaultClientConfigLoadingRules()
+	config := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(rules, &clientcmd.ConfigOverrides{})
+	return config.ClientConfig()
 }
 
 func InitLogger(lvl slog.Level) {
