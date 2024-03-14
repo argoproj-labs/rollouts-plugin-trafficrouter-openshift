@@ -29,4 +29,8 @@ release:
 
 .PHONY: test
 test: ## Run tests.
-	go test -coverprofile cover.out `go list ./...`
+	go test -coverprofile cover.out `go list ./... | grep -v 'tests/e2e'`
+
+.PHONY: test-e2e
+test-e2e: ## Run e2e tests.
+	go test -v -p=1 -timeout=20m -race -count=1 -coverprofile=coverage.out ./tests/e2e
