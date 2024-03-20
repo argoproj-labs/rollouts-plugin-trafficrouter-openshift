@@ -20,6 +20,7 @@ if [ $# -eq 0 ]; then
 fi
 ROLLOUTS_DIR=$1
 
+mkdir -p $ROLLOUTS_DIR/plugin-bin
 
 kubectl delete ns argo-rollouts || true
 
@@ -49,6 +50,7 @@ EOF
 cd $ROLLOUTS_DIR
 kubectl apply -k manifests/crds
 rm -f /tmp/rollouts-controller.log || true
+go mod tidy
 go run ./cmd/rollouts-controller/main.go 2>&1 | tee /tmp/rollouts-controller.log &
 
 # wait for the controller to start
