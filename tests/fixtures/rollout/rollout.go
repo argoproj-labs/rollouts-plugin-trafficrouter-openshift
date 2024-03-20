@@ -98,7 +98,7 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 		}
 		stableService, err := k8sClient.CoreV1().Services(ns).Get(ctx, stableName, metav1.GetOptions{})
 		if err != nil {
-			fmt.Println("failed to get stable servive", err)
+			fmt.Println("failed to get stable service", err)
 			return false
 		}
 
@@ -111,13 +111,13 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 			} else if rs.ResourceVersion == "2" {
 				if rs.Spec.Template.Labels[rolloutsv1alpha1.DefaultRolloutUniqueLabelKey] !=
 					stableService.Spec.Selector[rolloutsv1alpha1.DefaultRolloutUniqueLabelKey] {
-					fmt.Printf("expected the stable service %s to point to the latest ReplicSet %s\n", stableName, rs.Name)
+					fmt.Printf("expected the stable service %s to point to the latest ReplicaSet %s\n", stableName, rs.Name)
 					return false
 				}
 
 				if rs.Spec.Template.Labels[rolloutsv1alpha1.DefaultRolloutUniqueLabelKey] !=
 					canaryService.Spec.Selector[rolloutsv1alpha1.DefaultRolloutUniqueLabelKey] {
-					fmt.Printf("expected the canary service %s to point to the latest ReplicSet %s\n", canaryName, rs.Name)
+					fmt.Printf("expected the canary service %s to point to the latest ReplicaSet %s\n", canaryName, rs.Name)
 					return false
 				}
 
