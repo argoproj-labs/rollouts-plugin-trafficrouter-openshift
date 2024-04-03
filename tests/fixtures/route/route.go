@@ -32,7 +32,12 @@ func HaveWeights(stableWeight, canaryWeight int32) matcher.GomegaMatcher {
 			return false
 		}
 
-		if len(route.Spec.AlternateBackends) == 1 && *route.Spec.AlternateBackends[0].Weight != canaryWeight {
+		if len(route.Spec.AlternateBackends) == 0 && canaryWeight != 0 {
+			// If alternate backend is empty, that is equivalent to a canary weight of 0, so we verify here that canary weight is 0.
+			fmt.Printf("Canary weight mismatch: got %d, want %d\n", 0, canaryWeight)
+			return false
+
+		} else if len(route.Spec.AlternateBackends) == 1 && *route.Spec.AlternateBackends[0].Weight != canaryWeight {
 			fmt.Printf("Canary weight mismatch: got %d, want %d\n", *route.Spec.AlternateBackends[0].Weight, canaryWeight)
 			return false
 		}
