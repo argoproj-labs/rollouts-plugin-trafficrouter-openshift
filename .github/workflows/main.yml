@@ -10,18 +10,15 @@ on:
     branches:
       - "*"
 
-env:
-  GOLANG_VERSION: "1.21"
-
 jobs:
   unit-tests:
     name: Unit tests running
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GOLANG_VERSION }}
+          go-version-file: './go.mod'
 
       - name: Checkout code
         uses: actions/checkout@v3.1.0
@@ -31,13 +28,13 @@ jobs:
           make test
 
   linting:
-    name: Go code linting
+    name: Go code lint and gosec
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GOLANG_VERSION }}
+          go-version-file: './go.mod'
 
       - name: Checkout code
         uses: actions/checkout@v3.1.0
@@ -48,14 +45,18 @@ jobs:
           version: latest
           args: --verbose --timeout 6m
 
+      - name: Run gosec
+        run: |
+          make gosec
+
   build:
     name: Build creation
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GOLANG_VERSION }}
+          go-version-file: './go.mod'
 
       - name: Checkout code
         uses: actions/checkout@v3.1.0
@@ -63,16 +64,3 @@ jobs:
       - name: Build creation
         run: |
           make build
-
-  gosec:
-    runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-      GOFLAGS: -buildvcs=false
-    steps:
-      - name: Checkout Source
-        uses: actions/checkout@v3
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@master
-        with:
-          args: ./...
