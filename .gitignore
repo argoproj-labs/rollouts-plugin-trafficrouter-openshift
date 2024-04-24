@@ -1,3 +1,4 @@
+bin/
 rollouts-plugin-trafficrouter-openshift
 .vscode/
 .idea/
