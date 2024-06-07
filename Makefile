@@ -7,10 +7,6 @@ DIST_DIR=${CURRENT_DIR}/dist
 clean:
 	rm ${DIST_DIR}/*
 
-.PHONY: lint
-lint:
-	golangci-lint run ./...
-
 .PHONY: build
 build:
 	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build -v -o ${DIST_DIR}/${BIN_NAME} .
@@ -34,6 +30,20 @@ test: ## Run tests.
 .PHONY: test-e2e
 test-e2e: ## Run e2e tests.
 	go test -v -p=1 -timeout=20m -race -count=1 -coverprofile=coverage.out ./tests/e2e
+
+GOLANGCI_LINT = $(shell pwd)/bin/golangci-lint
+golangci_lint: ## Download gosec locally if necessary.
+	$(call go-get-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint@latest)
+
+
+.PHONY: lint
+lint: golangci_lint
+	$(GOLANGCI_LINT) --version
+	GOMAXPROCS=2 $(GOLANGCI_LINT) run --fix --verbose --timeout 300s
+
+
+
+
 
 .PHONY: gosec
 gosec: go_sec
