@@ -1,0 +1,47 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rollouts-demo-stable
+spec:
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: rollouts-demo
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rollouts-demo-canary
+spec:
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: rollouts-demo
+
+---
+
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: rollouts-demo
+  annotations:
+    haproxy.router.openshift.io/disable_cookies: "true"
+spec:
+  to:
+    kind: Service
+    name: rollouts-demo-stable
+    weight: 50
+  alternateBackends:
+    - kind: Service
+      name: rollouts-demo-canary
+      weight: 50
+  port:
+    targetPort: http
+  wildcardPolicy: None

@@ -44,6 +44,35 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			Expect(err).ToNot(HaveOccurred())
 		})
 
+		It("should initialize the canary weight to zero when a Rollout is created", func() {
+			By("create a Route with predefined weights for stable and canary")
+			err := fixtures.ApplyResources("../data/route_with_weights.yaml", namespace)
+			Expect(err).ToNot(HaveOccurred())
+
+			By("Route should retain the weights set for canary and stable")
+			route := &routeapi.Route{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      "rollouts-demo",
+					Namespace: namespace,
+				},
+			}
+			Eventually(route, "30s", "1s").Should(routeFixture.HaveWeights(50, 50))
+
+			By("apply the Rollout and verify if the weights have been reinitialized")
+			err = fixtures.ApplyResources("../data/sample_rollout.yaml", namespace)
+			Expect(err).ToNot(HaveOccurred())
+
+			rollout, err := rolloutClient.ArgoprojV1alpha1().Rollouts(namespace).Get(
+				ctx,
+				rolloutName,
+				metav1.GetOptions{},
+			)
+			Expect(err).ToNot(HaveOccurred())
+			Eventually(rollout, "60s", "1s").Should(rolloutFixture.HavePhase(rolloutsv1alpha1.RolloutPhaseHealthy))
+
+			Eventually(route, "30s", "1s").Should(routeFixture.HaveWeights(100, 0))
+		})
+
 		It("should handle a Rollout with multiple steps", func() {
 			err := fixtures.ApplyResources("../data/single_route.yaml", namespace)
 			Expect(err).ToNot(HaveOccurred())
