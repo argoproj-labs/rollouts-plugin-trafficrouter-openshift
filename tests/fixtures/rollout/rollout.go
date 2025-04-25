@@ -13,6 +13,38 @@ import (
 	"k8s.io/client-go/util/retry"
 )
 
+func HaveExpectedObservedGeneration() matcher.GomegaMatcher {
+
+	return WithTransform(func(rollout *rolloutsv1alpha1.Rollout) bool {
+		rolloutClient, err := fixtures.GetRolloutsClient()
+		if err != nil {
+			fmt.Println("failed to create the Rollout client", err)
+			return false
+		}
+
+		ctx := context.Background()
+		rollout, err = rolloutClient.ArgoprojV1alpha1().Rollouts(rollout.Namespace).Get(
+			ctx,
+			rollout.Name,
+			metav1.GetOptions{},
+		)
+		if err != nil {
+			fmt.Println("failed to get the Rollout", err)
+			return false
+		}
+
+		generation := fmt.Sprintf("%d", rollout.Generation)
+		observedGeneration := rollout.Status.ObservedGeneration
+
+		if generation != observedGeneration {
+			fmt.Println("HaveExpectedObservedGeneration - observedGeneration does not yet match generation", generation, observedGeneration)
+			return false
+		}
+
+		return true
+	}, BeTrue())
+}
+
 func HavePhase(status rolloutsv1alpha1.RolloutPhase) matcher.GomegaMatcher {
 	return WithTransform(func(rollout *rolloutsv1alpha1.Rollout) bool {
 		rolloutClient, err := fixtures.GetRolloutsClient()
@@ -121,7 +153,7 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 					return false
 				}
 
-				if *rs.Spec.Replicas != int32(expectedReplicas) {
+				if (int)(*rs.Spec.Replicas) != expectedReplicas {
 					fmt.Printf("expected the latest ReplicaSet %s to have %d replicas", rs.Name, expectedReplicas)
 					return false
 				}

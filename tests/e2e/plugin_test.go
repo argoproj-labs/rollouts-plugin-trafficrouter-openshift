@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/pkg/plugin"
 	"github.com/argoproj-labs/rollouts-plugin-trafficrouter-openshift/tests/fixtures"
@@ -248,12 +249,17 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			Eventually(routeA, "20s", "1s").Should(routeFixture.HaveWeights(50, 50))
 			Eventually(routeB, "20s", "1s").Should(routeFixture.HaveWeights(50, 50))
 
+			// There is a race condition in Rollouts where a call to PromoteRollout too quickly will cause 'Rollout phase mismatch, got Paused, want Healthy'
+			// I don't see a way to know when it's possible to promote the Rollout, so for now just wait X seconds
+			Eventually(rollout, "30s", "5s").Should(rolloutFixture.HaveExpectedObservedGeneration())
+			time.Sleep(10 * time.Second)
+
 			By("promote the Rollout for the final time and verify if the previous version is removed")
 			rollout, err = promote.PromoteRollout(rolloutClient.ArgoprojV1alpha1().Rollouts(namespace),
 				rolloutName, false, false, false)
 			Expect(err).ToNot(HaveOccurred())
 
-			Eventually(rollout, "30s", "1s").Should(rolloutFixture.HavePhase(rolloutsv1alpha1.RolloutPhaseHealthy))
+			Eventually(rollout, "2m", "5s").Should(rolloutFixture.HavePhase(rolloutsv1alpha1.RolloutPhaseHealthy))
 
 			By("verify if the traffic weight is updated in the Route")
 			Eventually(routeA, "20s", "1s").Should(routeFixture.HaveWeights(100, 0))
