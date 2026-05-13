@@ -355,7 +355,9 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			By("verify if the Rollouts is Healthy and the Route is pointing to the new pods")
 			Eventually(rollout, "60s", "1s").Should(rolloutFixture.HavePhase(rolloutsv1alpha1.RolloutPhaseHealthy))
 			Eventually(route, "30s", "1s").Should(routeFixture.HaveWeights(100, 0))
-			Expect(rollout).Should(rolloutFixture.HasTransitionedToCanary(5))
+
+			By("waiting for the transition to canary, and waiting for experiment to clean up its replicaset pods")
+			Eventually(rollout, "60s", "5s").Should(rolloutFixture.HasTransitionedToCanary(5))
 
 		})
 	})

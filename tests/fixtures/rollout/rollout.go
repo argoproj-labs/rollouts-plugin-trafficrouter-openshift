@@ -116,8 +116,16 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 			return false
 		}
 
-		if len(rsList.Items) != 2 {
-			fmt.Printf("more than 2 ReplicaSets found for the selector: %v\n", selector.String())
+		countReplicaSets := 0
+		for _, rs := range rsList.Items {
+			if rs.Spec.Replicas != nil && *rs.Spec.Replicas == 0 {
+				continue
+			}
+			countReplicaSets++
+		}
+
+		if countReplicaSets != 2 {
+			fmt.Printf("more than 2 ReplicaSets found for the selector: %v %d\n", selector.String(), countReplicaSets)
 			return false
 		}
 
@@ -135,6 +143,11 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 		}
 
 		for _, rs := range rsList.Items {
+
+			if rs.Spec.Replicas != nil && *rs.Spec.Replicas == 0 {
+				continue
+			}
+
 			if rs.ResourceVersion == "1" {
 				if *rs.Spec.Replicas != 0 {
 					fmt.Printf("expected the previous ReplicaSet to be scaled down: %s\n", rs.Name)
