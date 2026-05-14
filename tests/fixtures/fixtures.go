@@ -91,6 +91,7 @@ func GetRouteClient() (openshiftclientset.Interface, error) {
 }
 
 func ApplyResources(path, ns string) error {
+	// #nosec G204 -- kubectl apply is intentional in e2e test fixtures; path and ns are test-controlled
 	cmd := exec.Command("kubectl", "apply", "-f", path, "-n", ns)
 	cmd.Env = os.Environ()
 	out, err := cmd.CombinedOutput()
