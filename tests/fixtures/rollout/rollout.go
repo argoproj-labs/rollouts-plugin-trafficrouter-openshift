@@ -124,8 +124,8 @@ func HasTransitionedToCanary(expectedReplicas int) matcher.GomegaMatcher {
 			countReplicaSets++
 		}
 
-		if countReplicaSets != 2 {
-			fmt.Printf("more than 2 ReplicaSets found for the selector: %v %d\n", selector.String(), countReplicaSets)
+		if countReplicaSets != 1 {
+			fmt.Printf("more than 1 ReplicaSets found for the selector: %v %d\n", selector.String(), countReplicaSets)
 			return false
 		}
 

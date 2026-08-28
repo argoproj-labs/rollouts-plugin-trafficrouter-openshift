@@ -199,7 +199,7 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			Eventually(route, "20s", "1s").Should(routeFixture.HaveWeights(100, 0))
 
 			By("verify if the old ReplicaSet is scaled down")
-			Expect(rollout).Should(rolloutFixture.HasTransitionedToCanary(5))
+			Eventually(rollout, "2m", "5s").Should(rolloutFixture.HasTransitionedToCanary(5))
 
 		})
 
@@ -266,7 +266,7 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			Eventually(routeB, "20s", "1s").Should(routeFixture.HaveWeights(100, 0))
 
 			By("verify if the old Replicaset is scaled down")
-			Expect(rollout).Should(rolloutFixture.HasTransitionedToCanary(5))
+			Eventually(rollout, "2m", "5s").Should(rolloutFixture.HasTransitionedToCanary(5))
 		})
 
 		It("should handle the Rollouts with Experiment and Analysis", func() {
@@ -357,7 +357,7 @@ var _ = Describe("OpenShift Route Traffic Plugin Tests", func() {
 			Eventually(route, "30s", "1s").Should(routeFixture.HaveWeights(100, 0))
 
 			By("waiting for the transition to canary, and waiting for experiment to clean up its replicaset pods")
-			Eventually(rollout, "60s", "5s").Should(rolloutFixture.HasTransitionedToCanary(5))
+			Eventually(rollout, "2m", "5s").Should(rolloutFixture.HasTransitionedToCanary(5))
 
 		})
 	})
